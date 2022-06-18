@@ -38,13 +38,12 @@ const registerUser = asyncHandler(async (req, res) => {
 			name: user.name,
 			email: user.email,
 			password: hashPassword,
+			token: generateToken(user.id),
 		});
 	} else {
 		res.status(400);
 		throw new Error("Invalid User Data");
 	}
-
-	res.json(req.body);
 });
 
 // @desc  Authenticate User
@@ -58,15 +57,15 @@ const loginUser = asyncHandler(async (req, res) => {
 
 	// check password
 	if (user && (await bcrypt.compare(password, user.password))) {
-		res.status(201).json(user);
+		res.status(201).json({
+			_id: user._id,
+			email: user.email,
+			token: generateToken(user._id),
+		});
 	} else {
 		res.status(400);
 		throw new Error("Invalid user credential");
 	}
-
-	res.json({
-		message: "Login User",
-	});
 });
 
 // @desc  Get user's data
@@ -77,5 +76,12 @@ const getUserData = asyncHandler(async (req, res) => {
 		message: "get user data",
 	});
 });
+
+// generate token
+const generateToken = (id) => {
+	return jwt.sign({ id }, process.env.JWT_SECRET, {
+		expiresIn: "30d",
+	});
+};
 
 module.exports = { registerUser, loginUser, getUserData };
