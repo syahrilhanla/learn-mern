@@ -3,6 +3,17 @@ const bcrypt = require("bcryptjs");
 const asyncHandler = require("express-async-handler");
 const User = require("../model/userModel");
 
+// @desc  Get all user
+// @route GET /api/users
+// @access  Public
+const getAllUsers = asyncHandler(async (req, res) => {
+	const users = await User.find();
+
+	res.status(200).json({
+		users,
+	});
+});
+
 // @desc  Register a new user
 // @route POST /api/users
 // @access  Public
@@ -73,8 +84,12 @@ const loginUser = asyncHandler(async (req, res) => {
 // @route GET /api/users/me
 // @access  Private
 const getUserData = asyncHandler(async (req, res) => {
-	res.json({
-		message: "get user data",
+	const { _id, email, name } = await User.findById(req.user.id);
+
+	res.status(200).json({
+		id: _id,
+		name,
+		email,
 	});
 });
 
@@ -85,4 +100,4 @@ const generateToken = (id) => {
 	});
 };
 
-module.exports = { registerUser, loginUser, getUserData };
+module.exports = { registerUser, loginUser, getUserData, getAllUsers };
